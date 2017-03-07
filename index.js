@@ -46,6 +46,49 @@ exports.generate = function(data, options = {}) {
 
 
 /**
+ * State of the ticket:
+ * 		Valid: correct and could be used
+ *		Expired: expiration date is less than Now
+ *		Invalid: Digital signature is not correct
+ */
+exports.TicketState_Valid = TicketState_Valid = 0;
+exports.TicketState_Expired = TicketState_Expired = 1;
+exports.TicketState_Invalid = TicketState_Invalid = 2;
+
+/**
+ * Getting validation state of the ticket
+ * 
+ * @param {JSON Object} ticket - ticket need be validated
+ * @return {TicketState} Current state of the ticket (Valid/invalid/expired/...)
+ */
+exports.getTicketState = function(ticket) {
+	// Check if expiration date is passed
+	if (ticket["expiration"] != undefined && ticket["expiration"] < new Date()) 
+		return TicketState_Expired;
+
+	// Check the digital signature
+	let signTicket = ticket["signature"];
+	if (signTicket == undefined) 
+		return TicketState_Invalid;
+
+	let salt = signTicket.substr(0, 6);
+	let sign = salt + md5(`${salt} : ${_secret}`);	
+	return (signTicket == sign) ? TicketState_Valid : TicketState_Invalid;
+};
+
+
+/**
+ * Checks if the ticket is valid (i.e., signature is correct and it is not expired)
+ * 
+ * @param {JSON Object} ticket - ticket need be validated
+ * @return {boolean} True if the ticket is correct; otherwise return false
+ */
+ exports.isValid = function(ticket) {
+ 	return this.getTicketState(ticket) == TicketState_Valid;
+ }
+
+
+/**
  * Generates string, each symbol of that is either number or A..F
  *
  * @param {number} length - length of string to be generated
