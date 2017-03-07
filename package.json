@@ -1,0 +1,26 @@
+{
+  "name": "encrypted-ticket",
+  "version": "0.1.0",
+  "description": "Custom ticket generation and validation util",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SSharyk/encrypted-ticket.git"
+  },
+  "keywords": [
+    "auth",
+    "authorization",
+    "encryption",
+    "decryption",
+    "ticket"
+  ],
+  "author": "SSharyk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SSharyk/encrypted-ticket/issues"
+  },
+  "homepage": "https://github.com/SSharyk/encrypted-ticket#readme"
+}
