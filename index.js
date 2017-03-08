@@ -9,7 +9,11 @@ const MAX_HEX_SYMBOL = 0xF;
 const MIN_HEX_SYMBOL = 0x0;
 
 // Server's private key for encryption
-let _secret = generateRandomString(256);
+const KEY_LENGTH = 256;
+let _secret = generateRandomString(KEY_LENGTH);
+
+const HASH_LENGTH = 32;
+const SALT_LENGTH = 6;
 
 /**
  * Generates new ticket based on passed user data	
@@ -21,26 +25,24 @@ let _secret = generateRandomString(256);
 exports.generate = function(data, options = {}) {
 	if (!data) return false;
 
-	// just string of neccessary user's data and it's AES encryption
-	let dataJson = JSON.stringify(data);
-	let encryption = aes.encrypt(_secret, dataJson);
-
 	// date of ticket's expiration: default is 1 hour
 	let expiration = new Date( (new Date()).getTime() + LIFETIME );
 
 	// salt for hash: 6 hex symbols
-	let salt = generateRandomString(6);
+	let salt = generateRandomString(SALT_LENGTH);
 
 	// signature
-	let sign = salt + md5(`${salt} : ${_secret}`);
+	let sign = salt + md5(`${salt} : ${expiration} : ${_secret}`);
 
 	// ticket's data is in the form of JSON object: {Data; Expiration date; Signature}
 	var ticket = {
-		data: encryption,
 		expiration: expiration,
 		signature: sign
 	};
-
+	if (options["store"]) {
+		ticket["data"] = aes.encrypt(_secret, JSON.stringify(data));
+	}
+	
 	return ticket;
 };
 
@@ -71,8 +73,9 @@ exports.getTicketState = function(ticket) {
 	if (signTicket == undefined) 
 		return TicketState_Invalid;
 
-	let salt = signTicket.substr(0, 6);
-	let sign = salt + md5(`${salt} : ${_secret}`);	
+	let saltLength = signTicket.length - HASH_LENGTH;
+	let salt = signTicket.substr(0, saltLength);
+	let sign = salt + md5(`${salt} : ${ticket["expiration"]} : ${_secret}`);
 	return (signTicket == sign) ? TicketState_Valid : TicketState_Invalid;
 };
 
@@ -104,3 +107,16 @@ function generateRandomString(length) {
 	}
 	return s;
 };
+
+/**
+ * Extracts data from emcrypted ticket
+ *
+ * @param {JSON Object} ticket - ticket need be decrypted
+ * @return {JSON Object} Encrypted data and Expiration date of the ticket as a JSON
+ */
+exports.decryptData = function(ticket) {
+	if (ticket["data"] == undefined)
+		throw new ReferenceError("No encrypted data in the ticket");
+
+	return aes.decrypt(_secret, ticket["data"]);
+}
