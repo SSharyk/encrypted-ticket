@@ -120,3 +120,11 @@ exports.decryptData = function(ticket) {
 
 	return aes.decrypt(_secret, ticket["data"]);
 }
+
+/**
+ * Clears ticket by setting its expiration date to zero
+ * @param {JSON Object} ticket - ticket need be deleted
+ */ 
+exports.delete = function(ticket) {
+	ticket["expiration"] = new Date(0);
+}
