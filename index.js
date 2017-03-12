@@ -126,5 +126,14 @@ exports.decryptData = function(ticket) {
  * @param {JSON Object} ticket - ticket need be deleted
  */ 
 exports.delete = function(ticket) {
+	if (!this.isValid(ticket))
+		throw new Error('Ticket is not valid');
+
 	ticket["expiration"] = new Date(0);
+	
+	if (ticket["data"]) 
+		delete ticket["data"];
+	
+	let salt = generateRandomString(SALT_LENGTH);
+	ticket["signature"] = salt + md5(`${salt} : ${ticket["expiration"]} : ${_secret}`);
 }
