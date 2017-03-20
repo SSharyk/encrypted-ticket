@@ -3,7 +3,7 @@ Encrypted ticket Node.js package
 Custom ticket generation and validation util
 
 ## Summary
-_Version_: 0.1.0
+_Version_: 0.1.2
 
 _Usage_: authorization cases
 
@@ -11,7 +11,7 @@ _Usage_: authorization cases
 Ticket is a data structure used to authorize and/or authenticate the user. It represents JSON Object with three fields:
 * Expiration date (1 hour as default)
 * Signature (used for validating)
-* User's data: encrypted with AES algo
+* User's data: encrypted with AES algo (optional; default is `false`)
 
 
 ## How to use
@@ -19,6 +19,10 @@ Ticket is a data structure used to authorize and/or authenticate the user. It re
 1. To install the package, type `npm install encrypted-ticket` in prompt.
 2. Use `require('encrypted-ticket')` to import the functionality.
 3. Use `ticket.generate(data, option)` to create new ticket. `Data` is user's data need to be stored in the ticket and used in next session request, and `option` is set of additional values used to specify tickets generation process options.
+Option could be:
+* `store` : `true` if encrypted data need be stored inside the ticket
+* `expiration` : time period that sets ticket's expiration period (in hours; default is `1`)
+* `timezone` : number that sets local and UTC time difference (in hours; default is `4`)
 4. Use `ticket.isValid(t)` to check if the ticket `t` is valid (i.e., it's signature is correct and expiration date is not passed yet).
 5. Use `ticket.decryptData(t)` to decrypt data in the according field.
 

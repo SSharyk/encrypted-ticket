@@ -3,6 +3,8 @@ var aes = require("aes256");
 
 // Ticket lifetime (in milliseconds)
 const LIFETIME = 60 * 60 * 1000;
+const DEFAULT_EXPIRATION = 1;
+const DEFAULT_TIME_ZONE = 4;
 
 // Hexadecimal symbols (0..9A..F)
 const MAX_HEX_SYMBOL = 0xF;
@@ -26,7 +28,9 @@ exports.generate = function(data, options = {}) {
 	if (!data) return false;
 
 	// date of ticket's expiration: default is 1 hour
-	let expiration = new Date( (new Date()).getTime() + LIFETIME );
+	let hours = (options["expiration"] != undefined) ? options["expiration"] : DEFAULT_EXPIRATION;
+	hours += (options["timezone"] != undefined) ? options["timezone"] : DEFAULT_TIME_ZONE;
+	let expiration = new Date( (new Date()).getTime() + LIFETIME * hours);
 
 	// salt for hash: 6 hex symbols
 	let salt = generateRandomString(SALT_LENGTH);
